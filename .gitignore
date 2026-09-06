@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.npmcache/
+*.log
+.DS_Store
+
+# Local browser automation profiles (cookies / login state — never publish)
+.chromeprof/
+.chromeprof2/
+.chromeprof3/
+.chromeprof4/
+.edgeprof/
+
+# Machine-local npm cache config
+.npmrc

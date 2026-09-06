@@ -1,0 +1,258 @@
+/* EPHEMERA — shell styles.
+   The picture is a fixed 2.35:1 cinema window (VISUAL_BIBLE §3.3, TECHNICAL_PLAN §10).
+   All sizing is driven by CSS custom properties set by StageManager on <html>:
+     --pw / --ph : picture width / height in px (the "reference" rect of this window)
+     --px / --py : picture offset (top-left) in px
+     --barH      : letterbox bar height in px
+   Typography inside the picture sizes from --ph (e.g. cap heights in % of picture height). */
+
+:root {
+  --pw: 1920px;
+  --ph: 810px;
+  --px: 0px;
+  --py: 135px;
+  --barH: 135px;
+  --cr: 1; /* cursor / pointer-events resolution factor (not used for layout) */
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  font-family: "Cormorant Garamond", "Times New Roman", Times, serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+#gl {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  display: block;
+  background: #000;
+}
+
+/* ------- letterbox bars (pure #000 — the only pure black, per §1.2) ------- */
+#bars {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+.bar {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  background: #000;
+}
+#bar-top {
+  top: 0;
+  height: var(--barH);
+}
+#bar-bottom {
+  bottom: 0;
+  height: var(--barH);
+}
+
+/* ------- the picture layer (DOM ink over the WebGL plate) ------- */
+#picture {
+  position: fixed;
+  left: var(--px);
+  top: var(--py);
+  width: var(--pw);
+  height: var(--ph);
+  z-index: 3;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* CSS-only sky: shown before the first WebGL frame (never pure black) */
+#picture-sky {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 80% at 50% 46%, #0d1119 0%, #0b0e16 55%, #090c13 100%);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+html.booted #picture-sky {
+  opacity: 1;
+}
+html.gl-ready #picture-sky {
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+
+/* ---------------- typography ---------------- */
+
+/* Title: Didone display caps (Playfair Display). A scatter, not a word (§2.1).
+   Letters are sized in %PH so the constellation-scale survives any window. */
+#title-card {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: flex-start;
+  font-family: "Playfair Display", Didot, "Bodoni MT", "Times New Roman", serif;
+  font-weight: 700;
+  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 0;
+  white-space: nowrap;
+  user-select: none;
+  filter: brightness(1);
+  transition: filter 0.2s linear;
+}
+.letter {
+  position: relative;
+  display: inline-block;
+  line-height: 1;
+  color: #f1ece3; /* ivory — warm white, never #fff */
+  opacity: 0;
+  transition: opacity 0.55s ease-out;
+  /* backlit-vellum halo: layered text-shadow, ~1.5% of picture height */
+  text-shadow:
+    0 0 0.01em rgba(244, 241, 234, 0.0),
+    0 0 0.02em rgba(244, 241, 234, 0.06),
+    0 0 0.055em rgba(241, 236, 227, 0.1),
+    0 0 0.12em rgba(224, 218, 205, 0.08);
+}
+.letter.in {
+  opacity: 1;
+}
+.letter .sparkle {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.9;
+}
+.letter .sparkle svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 1.5px rgba(244, 241, 234, 0.55));
+  animation: sparkle 1.9s ease-in-out infinite;
+  transform-origin: 50% 50%;
+}
+@keyframes sparkle {
+  0%, 100% { transform: scale(0.85) rotate(0deg); opacity: 0.55; }
+  50% { transform: scale(1.12) rotate(0deg); opacity: 1; }
+}
+/* reduced motion: sparkles hold still (ACCESSIBILITY §12.8) */
+@media (prefers-reduced-motion: reduce) {
+  .letter .sparkle svg { animation: none; opacity: 0.85; transform: scale(1); }
+  .letter { transition: none; }
+}
+
+/* Credit: old-style italic serif — deliberately near the legibility floor (§2.2) */
+#credit {
+  position: absolute;
+  left: 49.5%;
+  top: 65%;
+  transform: translate(-50%, 0);
+  font-family: "Cormorant Garamond", Garamond, "Times New Roman", serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: calc(var(--ph) * 0.0246); /* cap-height ~2.5% PH; x-height room for descenders */
+  line-height: 1;
+  color: #ece7dc;
+  opacity: 0;
+  text-shadow: 0 0 6px rgba(236, 231, 220, 0.12);
+  letter-spacing: 0.02em;
+  transition: opacity 1.6s ease;
+  white-space: nowrap;
+  user-select: none;
+}
+#credit.in { opacity: 0.85; }
+@media (prefers-reduced-motion: reduce) {
+  #credit { transition: none; }
+}
+
+/* Caption / lyric: cinema-subtitle inside the bottom black bar (never over art) */
+#caption {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--barH);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+#lyric {
+  font-family: "Cormorant Garamond", Garamond, "Times New Roman", serif;
+  font-weight: 500;
+  font-size: calc(var(--barH) * 0.24);
+  letter-spacing: 0.42em;
+  text-indent: 0.42em;
+  color: #e6e3dc;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  text-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+  white-space: nowrap;
+}
+#lyric.in { opacity: 0.9; }
+@media (max-width: 700px) {
+  #lyric { letter-spacing: 0.28em; text-indent: 0.28em; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #lyric { transition: none; }
+}
+
+/* Replay: caption-styled control shown after the fade-out (§9.1) */
+#replay {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--barH) * 0.12);
+  transform: translateX(-50%);
+  z-index: 6;
+  font-family: "Cormorant Garamond", Garamond, serif;
+  font-size: calc(var(--barH) * 0.2);
+  letter-spacing: 0.35em;
+  text-indent: 0.35em;
+  color: #ddd9d0;
+  opacity: 0;
+  pointer-events: none;
+  cursor: pointer;
+  transition: opacity 1.4s ease;
+  user-select: none;
+  padding: calc(var(--barH) * 0.05) calc(var(--barH) * 0.2);
+}
+#replay.show {
+  opacity: 0.8;
+  pointer-events: auto;
+}
+#replay:hover { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  #replay { transition: none; }
+}
+
+#boot-status {
+  position: fixed;
+  right: 8px;
+  bottom: 4px;
+  z-index: 9;
+  font: 10px/1.3 monospace;
+  color: #39404e;
+  background: rgba(4, 6, 10, 0.55);
+  padding: 2px 6px;
+  border-radius: 3px;
+  pointer-events: none;
+  white-space: pre;
+}
+
+html.no-webgl #boot-status::after {
+  content: " — WebGL2 unavailable";
+  color: #b3565a;
+}

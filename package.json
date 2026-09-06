@@ -1,0 +1,24 @@
+{
+  "name": "ephemera",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "EPHEMERA — a locked-lens astronomical plate rendered in WebGL (Two.js/TS/Vite/GLSL)",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fontsource/cinzel": "^5.1.0",
+    "@fontsource/cormorant-garamond": "^5.1.0",
+    "@fontsource/playfair-display": "^5.1.0",
+    "three": "0.170.0"
+  },
+  "devDependencies": {
+    "@types/three": "0.170.0",
+    "typescript": "~5.6.3",
+    "vite": "^5.4.0"
+  }
+}
